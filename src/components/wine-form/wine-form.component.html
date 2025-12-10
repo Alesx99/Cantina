@@ -1,0 +1,85 @@
+<div class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+  <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-2xl transform transition-all duration-300 scale-100">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold text-white">
+        {{ wine() ? 'Modifica Vino' : 'Aggiungi Nuovo Vino' }}
+      </h2>
+      <button (click)="cancel.emit()" class="text-gray-400 hover:text-white transition-colors">
+        <i class="fas fa-times fa-2x"></i>
+      </button>
+    </div>
+    <form [formGroup]="wineForm" (ngSubmit)="onSubmit()">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Left Column: Form Fields -->
+        <div class="space-y-4">
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Nome</label>
+            <input type="text" id="name" formControlName="name" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+          </div>
+          <div>
+            <label for="winery" class="block text-sm font-medium text-gray-300 mb-1">Cantina</label>
+            <input type="text" id="winery" formControlName="winery" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="year" class="block text-sm font-medium text-gray-300 mb-1">Annata</label>
+              <input type="number" id="year" formControlName="year" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+            <div>
+              <label for="type" class="block text-sm font-medium text-gray-300 mb-1">Tipo</label>
+              <select id="type" formControlName="type" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <option>Rosso</option>
+                <option>Bianco</option>
+                <option>Rosato</option>
+                <option>Frizzante</option>
+              </select>
+            </div>
+          </div>
+          <!-- Pricing -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            @if (isMaster()) {
+              <div>
+                <label for="pricePurchase" class="block text-sm font-medium text-gray-300 mb-1">Acquisto (€)</label>
+                <input type="number" id="pricePurchase" formControlName="pricePurchase" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+              </div>
+            }
+            <div>
+                <label for="priceRetail" class="block text-sm font-medium text-gray-300 mb-1">Dettaglio (€)</label>
+                <input type="number" id="priceRetail" formControlName="priceRetail" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+            <div>
+                <label for="priceWholesale" class="block text-sm font-medium text-gray-300 mb-1">Ingrosso (€)</label>
+                <input type="number" id="priceWholesale" formControlName="priceWholesale" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+          </div>
+        </div>
+        <!-- Right Column: Image Uploader -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Etichetta</label>
+          <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md h-full">
+            <div class="space-y-1 text-center flex flex-col justify-center items-center">
+              @if (imagePreview) {
+                <img [src]="imagePreview" alt="Label preview" class="max-h-36 rounded-md object-contain">
+              } @else {
+                <i class="fas fa-image text-gray-500 text-4xl"></i>
+                <p class="text-xs text-gray-500">PNG, JPG, SVG fino a 1MB</p>
+              }
+              <div class="flex text-sm text-gray-500">
+                <label for="file-upload" class="relative cursor-pointer bg-gray-700 rounded-md font-medium text-indigo-400 hover:text-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-800 focus-within:ring-indigo-500 px-2 py-1">
+                  <span>Carica un file</span>
+                  <input id="file-upload" name="file-upload" type="file" class="sr-only" (change)="onFileChange($event)" accept="image/*">
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-8 flex justify-end space-x-4">
+        <button type="button" (click)="cancel.emit()" class="px-6 py-3 rounded-md text-white bg-gray-600 hover:bg-gray-500 transition-colors">Annulla</button>
+        <button type="submit" [disabled]="wineForm.invalid" class="px-6 py-3 rounded-md text-white font-semibold bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-900 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors">Salva Vino</button>
+      </div>
+    </form>
+  </div>
+</div>

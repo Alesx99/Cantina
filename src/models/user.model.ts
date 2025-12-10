@@ -1,0 +1,1 @@
+export type UserRole = 'Master' | 'Operatore' | 'Ospite';

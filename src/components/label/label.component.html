@@ -1,0 +1,35 @@
+<div class="fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50">
+  <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 flex flex-col">
+    <!-- Printable Area -->
+    <div #printable class="print-area bg-white text-black p-6 rounded-t-xl">
+        @if (wine(); as w) {
+            <div class="text-center mb-4">
+                <h1 class="text-xl font-semibold text-gray-800">Privilege Cafè & Wine</h1>
+            </div>
+            <div class="text-center border-b-2 border-gray-200 pb-4">
+                <h2 class="text-3xl font-bold">{{ w.name }}</h2>
+                <p class="text-lg text-gray-700">{{ w.winery }} - {{ w.year }}</p>
+            </div>
+            <div class="flex justify-between items-center mt-4">
+                <p class="text-gray-600 text-sm">Prezzo Enoteca</p>
+                <p class="text-3xl font-extrabold">{{ w.priceRetail | currency:'EUR' }}</p>
+            </div>
+            <div class="mt-6 flex justify-center">
+                <svg #barcode></svg>
+            </div>
+        } @else {
+            <p>Dati del vino non disponibili.</p>
+        }
+    </div>
+
+    <!-- Actions (Not printable) -->
+    <div class="no-print p-4 bg-gray-700 rounded-b-xl flex justify-end space-x-4">
+        <button (click)="close.emit()" class="px-4 py-2 rounded-md text-white bg-gray-600 hover:bg-gray-500 transition-colors">
+            <i class="fas fa-times mr-2"></i>Chiudi
+        </button>
+        <button (click)="printLabel()" class="px-4 py-2 rounded-md text-white font-semibold bg-indigo-600 hover:bg-indigo-700 transition-colors">
+            <i class="fas fa-print mr-2"></i>Stampa
+        </button>
+    </div>
+  </div>
+</div>

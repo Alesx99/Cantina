@@ -1,0 +1,165 @@
+@if (!isAuthenticated()) {
+  <app-login />
+} @else {
+  <div class="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 lg:p-8">
+    <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+      <div class="text-center sm:text-left">
+        <h1 class="text-4xl font-extrabold text-white tracking-tight">Cantina Digitale</h1>
+        <p class="text-gray-400 mt-1">Accesso come: <span class="font-bold text-indigo-400">{{ currentUserRole() }}</span></p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        @if (canWrite()) {
+          <button (click)="openAddForm()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-5 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+            <i class="fas fa-plus"></i>
+            <span>Aggiungi Vino</span>
+          </button>
+        }
+        <button (click)="logout()" class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-5 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Esci</span>
+        </button>
+      </div>
+    </header>
+    
+    <main>
+      @if (wines().length === 0) {
+        <div class="text-center py-20">
+          <div class="text-6xl text-gray-600 mb-4"><i class="fas fa-wine-bottle"></i></div>
+          <h2 class="text-2xl text-gray-400 font-semibold">La tua cantina è vuota.</h2>
+          <p class="text-gray-500">Clicca "Aggiungi Vino" per iniziare la tua collezione.</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          @for (wine of wines(); track wine.id) {
+            <div (click)="viewDetails(wine)" class="bg-gray-800 rounded-xl shadow-lg overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-indigo-500/30 hover:transform hover:-translate-y-2">
+              <div class="h-48 bg-gray-700 flex items-center justify-center overflow-hidden">
+                  @if (wine.labelImage) {
+                      <img [src]="wine.labelImage" alt="{{wine.name}} label" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                  } @else {
+                      <i class="fas fa-wine-bottle text-5xl text-gray-500"></i>
+                  }
+              </div>
+              <div class="p-4 relative">
+                <h3 class="text-lg font-bold text-white truncate">{{ wine.name }}</h3>
+                <p class="text-sm text-gray-400">{{ wine.winery }} - {{ wine.year }}</p>
+                
+                @if(canWrite()) {
+                  <div class="absolute top-2 right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button (click)="$event.stopPropagation(); openEditForm(wine)" class="bg-gray-700/50 hover:bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                      <i class="fas fa-pencil-alt text-xs"></i>
+                    </button>
+                    <button (click)="deleteWine($event, wine)" class="bg-gray-700/50 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                      <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </main>
+  </div>
+}
+
+
+<!-- Details Modal -->
+@if (selectedWine(); as wine) {
+  <div class="fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-40" (click)="closeDetails()">
+    <div (click)="$event.stopPropagation()" class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row transform transition-all duration-300 scale-100">
+      <div class="w-full md:w-1/3 flex-shrink-0 bg-gray-700 rounded-l-2xl flex items-center justify-center p-6">
+        @if (wine.labelImage) {
+            <img [src]="wine.labelImage" alt="{{wine.name}} Label" class="max-w-full max-h-96 object-contain rounded-md">
+        } @else {
+            <div class="text-center text-gray-500">
+                <i class="fas fa-image fa-6x"></i>
+                <p>Nessuna Etichetta</p>
+            </div>
+        }
+      </div>
+      <div class="w-full md:w-2/3 p-8 overflow-y-auto">
+        <div class="flex justify-between items-start">
+            <div>
+              <h2 class="text-4xl font-extrabold text-white">{{ wine.name }}</h2>
+              <p class="text-lg text-gray-400 mt-1">{{ wine.winery }} - {{ wine.year }}</p>
+              <span class="inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full"
+                [class]="{
+                    'bg-red-900 text-red-200': wine.type === 'Rosso',
+                    'bg-yellow-200 text-yellow-900': wine.type === 'Bianco',
+                    'bg-pink-300 text-pink-900': wine.type === 'Rosato',
+                    'bg-blue-200 text-blue-900': wine.type === 'Frizzante'
+                }">
+                {{ wine.type }}
+              </span>
+            </div>
+            <button (click)="closeDetails()" class="text-gray-500 hover:text-white transition-colors">
+              <i class="fas fa-times fa-2x"></i>
+            </button>
+        </div>
+        
+        <!-- Pricing Section -->
+        <div class="mt-6 border-t border-gray-700 pt-6">
+            <h3 class="text-xl font-bold text-indigo-400 mb-3 flex items-center gap-2">
+                <i class="fas fa-dollar-sign"></i> Prezzi
+            </h3>
+            @switch (currentUserRole()) {
+                @case ('Master') {
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-400">Prezzo Acquisto</h4>
+                            <p class="text-2xl font-bold text-white">{{ wine.pricePurchase | currency:'EUR' }}</p>
+                        </div>
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-400">Prezzo Dettaglio</h4>
+                            <p class="text-2xl font-bold text-white">{{ wine.priceRetail | currency:'EUR' }}</p>
+                        </div>
+                         <div class="bg-gray-700 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-400">Prezzo Ingrosso</h4>
+                            <p class="text-2xl font-bold text-white">{{ wine.priceWholesale | currency:'EUR' }}</p>
+                        </div>
+                    </div>
+                }
+                @case ('Operatore') {
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-400">Prezzo Dettaglio</h4>
+                            <p class="text-2xl font-bold text-white">{{ wine.priceRetail | currency:'EUR' }}</p>
+                        </div>
+                         <div class="bg-gray-700 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-gray-400">Prezzo Ingrosso</h4>
+                            <p class="text-2xl font-bold text-white">{{ wine.priceWholesale | currency:'EUR' }}</p>
+                        </div>
+                    </div>
+                }
+                @case ('Ospite') {
+                    <div class="bg-gray-700 p-4 rounded-lg text-center">
+                        <h4 class="text-sm font-semibold text-gray-400">Prezzo</h4>
+                        <p class="text-2xl font-bold text-white">{{ wine.priceRetail | currency:'EUR' }}</p>
+                    </div>
+                }
+            }
+        </div>
+        
+        <!-- Actions -->
+        <div class="mt-6 border-t border-gray-700 pt-6 flex justify-end">
+            <button (click)="openLabel(wine)" class="flex items-center gap-2 bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+              <i class="fas fa-barcode"></i>
+              <span>Stampa Etichetta</span>
+            </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Form Modal -->
+@if (showForm()) {
+  <app-wine-form [wine]="editingWine()" (save)="saveWine($event)" (cancel)="closeForm()" />
+}
+
+<!-- Label Modal -->
+@if (showLabel()) {
+  <app-label [wine]="labelWine()" (close)="closeLabel()" />
+}
